@@ -1,0 +1,56 @@
+@startuml
+package "Domain" {
+  class Document {
+    - status : DocumentStatus
+    + markInReview()
+    + markReadyForExport()
+    + markExported()
+  }
+
+  enum DocumentStatus
+  enum RecordApprovalStatus
+
+  class DocumentRecord {
+    - approvalStatus : RecordApprovalStatus
+    - state : RecordState
+    + startReview()
+    + approve()
+    + markExported()
+    + editField(key, newValue)
+  }
+}
+
+package "State (com.docweaver.state)" {
+
+  interface RecordState {
+    + startReview()
+    + approve()
+    + markExported()
+    + editField(key, newValue)
+  }
+
+  class DraftRecordState
+  class InReviewRecordState
+  class ReadyForExportRecordState
+  class ExportedRecordState
+}
+
+package "Service (com.docweaver.service)" {
+  class RecordApprovalService {
+    + startReview(recordId : String) : DocumentRecord
+    + approveRecord(recordId : String) : DocumentRecord
+    + markExported(recordId : String) : DocumentRecord
+    + editField(recordId : String, key : String, newValue : String) : DocumentRecord
+  }
+}
+
+DocumentRecord --> RecordState
+RecordState <|.. DraftRecordState
+RecordState <|.. InReviewRecordState
+RecordState <|.. ReadyForExportRecordState
+RecordState <|.. ExportedRecordState
+
+RecordApprovalService --> DocumentRecord
+RecordApprovalService --> Document
+
+@enduml

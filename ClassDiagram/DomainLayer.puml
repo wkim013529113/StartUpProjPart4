@@ -1,0 +1,92 @@
+@startuml
+package "Domain (com.docweaver.domain)" {
+
+  class Workspace {
+    - id : String
+    - name : String
+  }
+
+  enum DocumentStatus {
+    UPLOADED
+    PROCESSING
+    EXTRACTED
+    IN_REVIEW
+    READY_FOR_EXPORT
+    EXPORTED
+  }
+
+  enum DocumentType {
+    INVOICE
+    RECEIPT
+    PURCHASE_ORDER
+    CONTRACT
+  }
+
+  enum RecordApprovalStatus {
+    DRAFT
+    IN_REVIEW
+    READY_FOR_EXPORT
+    EXPORTED
+  }
+
+  class Document {
+    - id : String
+    - workspaceId : String
+    - filename : String
+    - status : DocumentStatus
+    - documentType : DocumentType
+    - recordId : String
+    + markProcessing()
+    + markExtracted()
+    + markInReview()
+    + markReadyForExport()
+    + markExported()
+  }
+
+  class ProcessingJob {
+    - id : String
+    - documentId : String
+    - jobType : JobType
+    - createdAt : Instant
+  }
+
+  class DocumentRecord {
+    - id : String
+    - documentId : String
+    - documentType : DocumentType
+    - createdAt : Instant
+    - fields : List<Field>
+    - lineItems : List<LineItem>
+    - approvalStatus : RecordApprovalStatus
+    - state : RecordState
+    + addField(f : Field)
+    + addLineItem(li : LineItem)
+    + startReview()
+    + approve()
+    + markExported()
+    + editField(key, newValue)
+  }
+
+  class Field {
+    - key : String
+    - value : String
+    - confidence : double
+    - sourceAnchor : String
+  }
+
+  class LineItem {
+    - description : String
+    - quantity : int
+    - unitPrice : double
+    - amount : double
+    - currency : String
+  }
+}
+
+Workspace "1" o-- "*" Document
+Document "1" o-- "0..1" DocumentRecord : recordId
+DocumentRecord "1" o-- "*" Field
+DocumentRecord "1" o-- "*" LineItem
+ProcessingJob "*" --> "1" Document
+
+@enduml

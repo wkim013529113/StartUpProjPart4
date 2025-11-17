@@ -1,0 +1,44 @@
+@startuml
+package "Domain" {
+  class Document
+  enum DocumentType
+  class DocumentRecord
+}
+
+package "Strategy (com.docweaver.strategy)" {
+
+  interface ExtractionStrategy {
+    + extract(doc : Document) : DocumentRecord
+  }
+
+  class ExtractionEngine {
+    - strategies : Map<DocumentType, ExtractionStrategy>
+    + register(type : DocumentType, strategy : ExtractionStrategy)
+    + extract(doc : Document) : DocumentRecord
+  }
+
+  class InvoiceExtractionStrategy
+  class ReceiptExtractionStrategy
+  class PurchaseOrderExtractionStrategy
+  class ContractExtractionStrategy
+}
+
+package "Service" {
+  class ExtractionJobProcessor {
+    + process(job : ProcessingJob)
+  }
+}
+
+DocumentType --> ExtractionEngine
+ExtractionEngine --> ExtractionStrategy
+
+ExtractionStrategy <|.. InvoiceExtractionStrategy
+ExtractionStrategy <|.. ReceiptExtractionStrategy
+ExtractionStrategy <|.. PurchaseOrderExtractionStrategy
+ExtractionStrategy <|.. ContractExtractionStrategy
+
+ExtractionJobProcessor --> ExtractionEngine
+ExtractionJobProcessor --> Document
+ExtractionJobProcessor --> DocumentRecord
+
+@enduml

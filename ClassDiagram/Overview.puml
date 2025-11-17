@@ -1,0 +1,87 @@
+@startuml
+package "com.docweaver.domain" {
+  class Document
+  class DocumentRecord
+  class Workspace
+  class ProcessingJob
+  enum DocumentStatus
+  enum DocumentType
+  enum RecordApprovalStatus
+  class Field
+  class LineItem
+}
+
+package "com.docweaver.service" {
+  class DocumentRepository
+  class DocumentRecordRepository
+  class ProcessingJobQueue
+  class ExtractionJobProcessor
+  class RecordApprovalService
+}
+
+package "com.docweaver.command" {
+  interface Command
+  class UploadDocumentCommand
+  class CommandDispatcher
+}
+
+package "com.docweaver.strategy" {
+  interface ExtractionStrategy
+  class ExtractionEngine
+  class InvoiceExtractionStrategy
+  class ReceiptExtractionStrategy
+  class PurchaseOrderExtractionStrategy
+  class ContractExtractionStrategy
+}
+
+package "com.docweaver.state" {
+  interface RecordState
+  class DraftRecordState
+  class InReviewRecordState
+  class ReadyForExportRecordState
+  class ExportedRecordState
+}
+
+package "com.docweaver.demo" {
+  class UploadDemoMain
+  class ExtractionDemoMain
+  class ApprovalDemoMain
+}
+
+DocumentRepository --> Document
+DocumentRecordRepository --> DocumentRecord
+ProcessingJobQueue --> ProcessingJob
+
+ExtractionJobProcessor --> DocumentRepository
+ExtractionJobProcessor --> DocumentRecordRepository
+ExtractionJobProcessor --> ExtractionEngine
+
+RecordApprovalService --> DocumentRepository
+RecordApprovalService --> DocumentRecordRepository
+
+UploadDocumentCommand --> DocumentRepository
+UploadDocumentCommand --> ProcessingJobQueue
+UploadDocumentCommand --> Workspace
+UploadDocumentCommand --> Document
+UploadDocumentCommand --> ProcessingJob
+
+ExtractionEngine --> ExtractionStrategy
+ExtractionEngine --> DocumentType
+
+DocumentRecord --> Field
+DocumentRecord --> LineItem
+
+DocumentRecord --> RecordState
+RecordState <|.. DraftRecordState
+RecordState <|.. InReviewRecordState
+RecordState <|.. ReadyForExportRecordState
+RecordState <|.. ExportedRecordState
+
+ExtractionStrategy <|.. InvoiceExtractionStrategy
+ExtractionStrategy <|.. ReceiptExtractionStrategy
+ExtractionStrategy <|.. PurchaseOrderExtractionStrategy
+ExtractionStrategy <|.. ContractExtractionStrategy
+
+CommandDispatcher --> Command
+
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+package "Domain" {
+  class Workspace
+  class Document
+  class ProcessingJob
+}
+
+package "Service (com.docweaver.service)" {
+  class DocumentRepository
+  class ProcessingJobQueue
+}
+
+package "Command (com.docweaver.command)" {
+
+  interface Command {
+    + execute()
+  }
+
+  class UploadDocumentCommand {
+    - workspace : Workspace
+    - filenames : List<String>
+    - documentRepository : DocumentRepository
+    - jobQueue : ProcessingJobQueue
+    + execute()
+  }
+
+  class CommandDispatcher {
+    - queue : Queue<Command>
+    + submit(cmd : Command)
+    + runAll()
+  }
+}
+
+CommandDispatcher --> Command
+UploadDocumentCommand ..|> Command
+
+UploadDocumentCommand --> Workspace
+UploadDocumentCommand --> DocumentRepository
+UploadDocumentCommand --> ProcessingJobQueue
+UploadDocumentCommand --> Document
+UploadDocumentCommand --> ProcessingJob
+
+@enduml
